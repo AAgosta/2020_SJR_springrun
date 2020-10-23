@@ -7,18 +7,18 @@
 
 # Instructions:
 # After you get your combined files, load them into the workspace:
+library(tidyverse)
 ### Technologic:
-tekno_merged2019 <- read_csv("C:/Users/chause/Documents/2019Filtering/PreviouslyFiltered/071519/accepted/SUMcombo.csv")
-dim(tekno_merged2019) # look at how many rows of data  
+tekno_merged2020 <- read_csv("data/SUMcombo.csv") #should be 53 receiver IDs
+dim(tekno_merged2020) # look at how many rows of data  
 ###ATS: 
-ATS_merged2019 <- read_csv("PreviouslyFiltered/071219/accepted/ATScombo.csv")
-dim(ATS_merged2019) # look at how many rows of data  
-ATS_merged_GG_Chipps <- read_csv("2019FILTERED/ATS/accepted/combined_files/ATScombo_NOAA_GG_Chipps.csv")
+ATS_merged2020 <- read_csv("data/ATScombo.csv")#should be 3 IDs
+dim(ATS_merged2020) # look at how many rows of data  
+  ATS_merged_GG_Chipps <- read_csv("2019FILTERED/ATS/accepted/combined_files/ATScombo_NOAA_GG_Chipps.csv")
 dim(ATS_merged_GG_Chipps)
 
 ###Lotek:
-lotek_merged2019 <- read_csv("PreviouslyFiltered/071219/accepted/LOTcombo.csv")
-dim(lotek_merged2019) # look at how many rows of data  
+dim(lotek_merged2020) # look at how many rows of data  
 
 # Next, determine how many receivers were filtered by counting the number of files in the accepted folder from which you combined the
 # files from. NOTE: any file that was accepted but has no data (ie. had good tags in the cleaned file but no data that passed the filter threshold)
@@ -28,9 +28,9 @@ dim(lotek_merged2019) # look at how many rows of data
 # accepted. Note if you are missing any, and figure out why
 
 ### Technologic:
-length(unique(tekno_merged2019$RecSN)) # determine how many different receiver IDs are in the file
-tekno_ids_merged <- (unique(tekno_merged2019$RecSN)) # save that list of ids as a vector
-print(tekno_ids_merged) # prints all those IDs in the vector
+length(unique(tekno_merged2020$RecSN)) # determine how many different receiver IDs are in the file
+#tekno_ids_merged <- (unique(tekno_merged2020$RecSN)) # save that list of ids as a vector
+#print(tekno_ids_merged) # prints all those IDs in the vector
 # if you have any discrepencies in the number of receiver in the combo file vs the accepted folder, go back through the file names
 # and make sure each are formatted so the code will recognize them as a tekno vs lotek vs ATS. Re-read the new file in as a different object
 # here is an example of when I had to do this. The first time I combined the tekno file I was missing 4 receivers from it, all those receivers
@@ -44,7 +44,7 @@ rec_ids_merged_fixed[x] # to see exactly which files were missing from the origi
 
 # following these same steps above but for ATS and Lotek:
 ### ATS:
-length(unique(ATS_merged2019$RecSN)) # determine how many different receiver IDs are in the file
+length(unique(ATS_merged2020$RecSN)) # determine how many different receiver IDs are in the file
 ATS_ids_merged <- (unique(ATS_merged2019$RecSN)) # save that list of ids as a vector
 print(ATS_ids_merged)
 #[1] 18031    THERE IS ONLY ONE BECASUE THERE WAS NO DATA IN THE OTHER 2 FILES 
@@ -56,6 +56,6 @@ ATS_ids_merged <- (unique(ATS_merged_GG_Chipps$RecSN)) # save that list of ids a
 print(ATS_ids_merged)
 
 ### Lotek:
-length(unique(lotek_merged2019$RecSN)) # determine how many different receiver IDs are in the file
+length(unique(lotek_merged2020$RecSN)) # determine how many different receiver IDs are in the file
 lotek_ids_merged <- (unique(lotek_merged2019$RecSN)) # save that list of ids as a vector
 print(lotek_ids_merged)
