@@ -37,6 +37,7 @@ dat <- tabledap('FEDcalFishTrack', url = "http://oceanview.pfeg.noaa.gov/erddap/
 
 #### STEP 5: WRITE TO CSV
 write.csv(dat, "data_output/Data_from_erdapp2020.csv")
+###TIP: do not commit/push any large data files (100s on lines), can cause issues. Just do tables and scripts
 
 ## Download only data from 1 receiver location
 #examples
