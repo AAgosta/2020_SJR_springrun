@@ -1,0 +1,513 @@
+---
+title: "2019Transit_Rate"
+author: "Colby Hause, Chris Bolte"
+date: "8/16/2019"
+output: html_document
+---
+
+Objective: To create box and whisker plots that show transit rate of fish from one site to the immediate site downstream. the CSVs you want set up are:
+group1_detections : all detections from upper release fish, with columns: rel_group, date_tagged, Hex, GPS names, rkm, Genrkm (if you want), dtf, AND**** must include the upper release site (one detection for each tag at time of release)
+group2_detections: all detections from delta release fish, with columns: rel_group, date_tagged, Hex, GPS names, rkm, Genrkm (if you want), dtf, AND**** must include the Durham release site (one detection for each tag at time of release)
+**make sure these detection files have has all bad detections REMOVED (using predator filter, also should have gone through the diting process where detection are removed that done fit the model)
+#use with 2020TransitRate_SJR.R 
+```{r}
+library(tidyverse)
+library(ggplot2)
+library(readr)
+```
+1. Read in the detection files. These file must have the release location as a "detection" for each 
+tag binded to the end of the file. This was done in the script " formatting_detection_csvs.R"
+
+2. Set up your routes: examples below
+upper_rel_routes <- c("Upstream Release Old River Route To Pumps", 
+                      "Upstream Release Old River Route To Ocean via OR",	"Upstream Release Old River Route To Ocean via Pumps",
+                       "Upstream Release Mainstem Route To Ocean")
+
+delta_rel_routes <- c("Delta Release Mainstem Route to HOR", 	"Delta Release Old River Route To Pumps",
+                      "Delta Release Old River Route To Ocean via ORHWY4", 	"Delta Release Old River Route To Ocean via Pumps",
+                      "Delta Release Mainstem Route To Ocean")
+                      
+3.Create a csv with the specific sites within each route. these are your df_locations in order route function. Examples below:
+upper_rel_locations <- read_csv("data/2020UpperRel_Locations_transit.csv")
+delta_rel_locations <- read_csv("data/2020DeltaRel_Locations_transit.csv")
+THESE COLUMN HEADERS NEED TO MATCH THE ROUTE NAMES FROM STEP 2
+
+4. Run function below to change all receriver names to common names that group them together. THESE NAMES HAVE TO MATCH THE NAMES IN THE FILES FROM STEP 3
+```{r}
+change_receiver_names <- function(df) {
+  #df$'GPS Names'[df$'GPS Names' == "CC_RGD_1_J"] <- "CC_CVP/RG"
+  #df$'GPS Names'[df$'GPS Names' == "CC_RGD_2_J"] <- "CC_CVP/RG"
+  #df$'GPS Names'[df$'GPS Names' == "CC_RGD_3_J"] <- "CC_CVP/RG"
+  #df$'GPS Names'[df$'GPS Names' == "CC_RGD_4_J"] <- "CC_CVP/RG"
+  #df$'GPS Names'[df$'GPS Names' == "CC_RGU1_J"] <- "CC_CVP/RG"
+  #df$'GPS Names'[df$'GPS Names' == "CC_RGU2_J"] <- "CC_CVP/RG"
+  #df$'GPS Names'[df$'GPS Names' == "CVP_Tank1_J"] <- "CC_CVP/RG"
+  #df$'GPS Names'[df$'GPS Names' == "CVP_Tank2_J"] <- "CC_CVP/RG"
+  #df$'GPS Names'[df$'GPS Names' == "CVP_Tank3_J"] <- "CC_CVP/RG"
+  #df$'GPS Names'[df$'GPS Names' == "CVP_Tank4_J"] <- "CC_CVP/RG"
+  #df$'GPS Names'[df$'GPS Names' == "CVPD_J"] <- "CC_CVP/RG"
+  #df$'GPS Names'[df$'GPS Names' == "CVPU_J"] <- "CC_CVP/RG"
+  #df$'GPS Names'[df$'GPS Names' == "CC_intake_J"] <- "CC_CVP/RG"
+
+  
+  df$'GPS Names'[df$'GPS Names' == "CC_RGD_1_J"] <- "Pumps"
+  df$'GPS Names'[df$'GPS Names' == "CC_RGD_2_J"] <- "Pumps"
+  df$'GPS Names'[df$'GPS Names' == "CC_RGD_3_J"] <- "Pumps"
+  df$'GPS Names'[df$'GPS Names' == "CC_RGD_4_J"] <- "Pumps"
+  df$'GPS Names'[df$'GPS Names' == "CC_RGU1_J"] <- "Pumps"
+  df$'GPS Names'[df$'GPS Names' == "CC_RGU2_J"] <- "Pumps"
+  df$'GPS Names'[df$'GPS Names' == "CVP_Tank1_J"] <- "Pumps"
+  df$'GPS Names'[df$'GPS Names' == "CVP_Tank2_J"] <- "Pumps"
+  df$'GPS Names'[df$'GPS Names' == "CVP_Tank3_J"] <- "Pumps"
+  df$'GPS Names'[df$'GPS Names' == "CVP_Tank4_J"] <- "Pumps"
+  df$'GPS Names'[df$'GPS Names' == "CVPD_J"] <- "Pumps"
+  df$'GPS Names'[df$'GPS Names' == "CVPU_J"] <- "Pumps"
+  df$'GPS Names'[df$'GPS Names' == "CC_intake_J"] <- "Pumps"
+  
+  #df$'GPS Names'[df$'GPS Names' == "SJ_ParadiseCut_DN_1_3"] <- "SJ PC"
+  
+  #df$'GPS Names'[df$'GPS Names' == "Delt_ParadiseCut_1_J"] <- "PC"
+  #df$'GPS Names'[df$'GPS Names' == "Delt_ParadiseCut_2_J"] <- "PC"
+  
+  df$'GPS Names'[df$'GPS Names' == "Delt_TC_1_J"] <- "Turner Cut"
+  df$'GPS Names'[df$'GPS Names' == "Delt_TC_2_J"] <- "Turner Cut"
+  df$'GPS Names'[df$'GPS Names' == "Delt_TC_3_J"] <- "Turner Cut"
+  df$'GPS Names'[df$'GPS Names' == "Delt_TC_4_J"] <- "Turner Cut"
+  
+  #df$'GPS Names'[df$'GPS Names' == "ESB_Greenhouse Rd1_J"] <- "Greenhouse"
+  #df$'GPS Names'[df$'GPS Names' == "ESB_Greenhouse Rd2_J"] <- "Greenhouse"
+  
+  #df$'GPS Names'[df$'GPS Names' == "ESB_Sandy Mush1_J"] <- "SM"
+  #df$'GPS Names'[df$'GPS Names' == "ESB_Sandy Mush2_J"] <- "SM"
+  
+  #df$'GPS Names'[df$'GPS Names' == "Mar_Drain_1_J"] <- "Mariposa"
+  #df$'GPS Names'[df$'GPS Names' == "Mar_Drain_2_J"] <- "Mariposa"
+  
+  df$'GPS Names'[df$'GPS Names' == "MidR_hwy4_1_J"] <- "Mid R Hwy"  
+  df$'GPS Names'[df$'GPS Names' == "MidR_hwy4_2_J"] <- "Mid R Hwy"
+  df$'GPS Names'[df$'GPS Names' == "MidR_hwy4_3_J"] <- "Mid R Hwy"
+  df$'GPS Names'[df$'GPS Names' == "MidR_hwy4_4_J"] <- "Mid R Hwy"
+  
+  df$'GPS Names'[df$'GPS Names' == "OR_hwy4_1_J"] <- "OR Hwy"
+  df$'GPS Names'[df$'GPS Names' == "OR_hwy4_2_J"] <- "OR Hwy"
+  df$'GPS Names'[df$'GPS Names' == "OR_hwy4_3_J"] <- "OR Hwy"
+  df$'GPS Names'[df$'GPS Names' == "OR_hwy4_4_J"] <- "OR Hwy"
+  
+  df$'GPS Names'[df$'GPS Names' == "OR_HOR_1_J"] <- "OR HOR"
+  df$'GPS Names'[df$'GPS Names' == "OR_HOR_2_J"] <- "OR HOR"
+  df$'GPS Names'[df$'GPS Names' == "OR_HOR_3_J"] <- "OR HOR"
+  df$'GPS Names'[df$'GPS Names' == "OR_HOR_4_J"] <- "OR HOR"
+
+  
+  df$'GPS Names'[df$'GPS Names' == "OR_MidR_1_J"] <- "OR MR"
+  df$'GPS Names'[df$'GPS Names' == "OR_MidR_2_J"] <- "OR MR"
+  
+  #df$'GPS Names'[df$'GPS Names' == "SJ_165_2_J"] <- "165"
+  #df$'GPS Names'[df$'GPS Names' == "SJ_165_1_J"] <- "165"
+  
+  df$'GPS Names'[df$'GPS Names' == "SJ_BCA_1_J"] <- "BCA"
+  df$'GPS Names'[df$'GPS Names' == "SJ_BCA_2_J"] <- "BCA"
+  
+  df$'GPS Names'[df$'GPS Names' == "SJ_BlwCrowsLanding_1_J"] <- "Crows"
+  df$'GPS Names'[df$'GPS Names' == "SJ_BlwCrowsLanding_2_J"] <- "Crows"
+  
+  df$'GPS Names'[df$'GPS Names' == "SJ_BlwWGrayson_1_J"] <- "Grayson"
+  df$'GPS Names'[df$'GPS Names' == "SJ_BlwWGrayson_2_J"] <- "Grayson"
+  
+  df$'GPS Names'[df$'GPS Names' == "SJ_Durhamferry_1_J"] <- "DF"
+  df$'GPS Names'[df$'GPS Names' == "SJ_Durhamferry_2_J"] <- "DF"
+  #df$'GPS Names'[df$'GPS Names' == "SJ_Durhamferry_RelRec_J"] <- "DF Rel Rec"
+  
+  df$'GPS Names'[df$'GPS Names' == "SJ_Hills_1_J"] <- "Hills"
+  df$'GPS Names'[df$'GPS Names' == "SJ_Hills_2_J"] <- "Hills"
+  df$'GPS Names'[df$'GPS Names' == "SJ_Hills_RT_1_DS"] <- "Hills"
+  #df$'GPS Names'[df$'GPS Names' == "SJ_Hills_RT_1_US"] <- "Hills"
+  #df$'GPS Names'[df$'GPS Names' == "SJ_Hills_RT_2_DS"] <- "Hills"
+  #df$'GPS Names'[df$'GPS Names' == "SJ_Hills_RT_2_US"] <- "Hills"
+
+  
+  df$'GPS Names'[df$'GPS Names' == "SJ_HOR_1_J"] <- "SJ HOR"
+  df$'GPS Names'[df$'GPS Names' == "SJ_HOR_2_J"] <- "SJ HOR"
+  df$'GPS Names'[df$'GPS Names' == "SJ_HOR_3_J"] <- "SJ HOR"
+  df$'GPS Names'[df$'GPS Names' == "SJ_HOR_4_J"] <- "SJ HOR"
+  
+  df$'GPS Names'[df$'GPS Names' == "SJ_Howard_1_J"] <- "Howard"
+  df$'GPS Names'[df$'GPS Names' == "SJ_Howard_2_J"] <- "Howard"
+  
+  df$'GPS Names'[df$'GPS Names' == "SJ_JP_1_J"] <- "JP"
+  df$'GPS Names'[df$'GPS Names' == "SJ_JP_2_J"] <- "JP"
+  df$'GPS Names'[df$'GPS Names' == "SJ_JP_3_J"] <- "JP"
+  df$'GPS Names'[df$'GPS Names' == "SJ_JP_4_J"] <- "JP"
+  df$'GPS Names'[df$'GPS Names' == "SJ_JP_5_J"] <- "JP"
+  df$'GPS Names'[df$'GPS Names' == "SJ_JP_6_J"] <- "JP"
+  df$'GPS Names'[df$'GPS Names' == "SJ_JP_7_J"] <- "JP"
+  df$'GPS Names'[df$'GPS Names' == "SJ_JP_8_J"] <- "JP"
+  
+  df$'GPS Names'[df$'GPS Names' == "SJ_MAC_1_J"] <- "MAC"
+  df$'GPS Names'[df$'GPS Names' == "SJ_MAC_2_J"] <- "MAC"
+  df$'GPS Names'[df$'GPS Names' == "SJ_MAC_3_J"] <- "MAC"
+  df$'GPS Names'[df$'GPS Names' == "SJ_MAC_4_J"] <- "MAC"
+  
+  #df$'GPS Names'[df$'GPS Names' == "SJ_MF1_J"] <- "MF"
+  #df$'GPS Names'[df$'GPS Names' == "SJ_MF2_J"] <- "MF"
+  #df$'GPS Names'[df$'GPS Names' == "SJ_MF3_J"] <- "MF"
+  #df$'GPS Names'[df$'GPS Names' == "SJ_MF4_J"] <- "MF"
+  
+  df$'GPS Names'[df$'GPS Names' == "SJ_Moss_1_J"] <- "Mossdale"
+  df$'GPS Names'[df$'GPS Names' == "SJ_Moss_2_J"] <- "Mossdale"
+  
+  #df$'GPS Names'[df$'GPS Names' == "SJ_SJC_1_J"] <- "SJC"
+  #df$'GPS Names'[df$'GPS Names' == "SJ_SJC_2_J"] <- "SJC"
+  #df$'GPS Names'[df$'GPS Names' == "SJ_SJC_3_J"] <- "SJC"
+  #df$'GPS Names'[df$'GPS Names' == "SJ_SJC_4_J"] <- "SJC"
+  
+  df$'GPS Names'[df$'GPS Names' == "SJ_SJG_1_J"] <- "SJG"
+  df$'GPS Names'[df$'GPS Names' == "SJ_SJG_2_J"] <- "SJG"
+  df$'GPS Names'[df$'GPS Names' == "SJ_SJG_3_J"] <- "SJG"
+  df$'GPS Names'[df$'GPS Names' == "SJ_SJG_4_J"] <- "SJG"
+  
+  df$'GPS Names'[df$'GPS Names' == "Chipps1.1"] <- "Chipps"
+  df$'GPS Names'[df$'GPS Names' == "Chipps1.2"] <- "Chipps"
+  df$'GPS Names'[df$'GPS Names' == "Chipps1.3"] <- "Chipps"
+  df$'GPS Names'[df$'GPS Names' == "Chipps1.4"] <- "Chipps"
+  df$'GPS Names'[df$'GPS Names' == "Chipps1.5"] <- "Chipps"
+  df$'GPS Names'[df$'GPS Names' == "Chipps2.1"] <- "Chipps"
+  df$'GPS Names'[df$'GPS Names' == "Chipps2.2"] <- "Chipps"
+  df$'GPS Names'[df$'GPS Names' == "Chipps2.3"] <- "Chipps"
+  df$'GPS Names'[df$'GPS Names' == "Chipps2.4"] <- "Chipps"
+  df$'GPS Names'[df$'GPS Names' == "Chipps2.5"] <- "Chipps"
+  
+  df$'GPS Names'[df$'GPS Names' == "GG1"] <- "GG"
+  df$'GPS Names'[df$'GPS Names' == "GG1.5"] <- "GG"
+  df$'GPS Names'[df$'GPS Names' == "GG1.7"] <- "GG"
+  df$'GPS Names'[df$'GPS Names' == "GG2.1"] <- "GG"
+  df$'GPS Names'[df$'GPS Names' == "GG2.5"] <- "GG"
+  df$'GPS Names'[df$'GPS Names' == "GG3.1"] <- "GG"
+  df$'GPS Names'[df$'GPS Names' == "GG3.5"] <- "GG"
+  df$'GPS Names'[df$'GPS Names' == "GG4"] <- "GG"
+  df$'GPS Names'[df$'GPS Names' == "GG4.5"] <- "GG"
+  df$'GPS Names'[df$'GPS Names' == "GG5.1"] <- "GG"
+  df$'GPS Names'[df$'GPS Names' == "GG5.5"] <- "GG"
+  df$'GPS Names'[df$'GPS Names' == "GG6"] <- "GG"
+  df$'GPS Names'[df$'GPS Names' == "GG6"] <- "GG"
+  df$'GPS Names'[df$'GPS Names' == "GG7"] <- "GG"
+  df$'GPS Names'[df$'GPS Names' == "GG7.2"] <- "GG"
+  df$'GPS Names'[df$'GPS Names' == "GG7.5"] <- "GG"
+  df$'GPS Names'[df$'GPS Names' == "GG7.7"] <- "GG"
+  df$'GPS Names'[df$'GPS Names' == "GG8"] <- "GG"
+   df$'GPS Names'[df$'GPS Names' == "GG8.4"] <- "GG"
+  df$'GPS Names'[df$'GPS Names' == "GG9"] <- "GG"
+  
+  
+  
+  df$'GPS Names'[df$'GPS Names' == "Benicia1"] <- "Benicia"
+  df$'GPS Names'[df$'GPS Names' == "Benicia2"] <- "Benicia"
+  df$'GPS Names'[df$'GPS Names' == "Benicia3"] <- "Benicia"
+  df$'GPS Names'[df$'GPS Names' == "Benicia4"] <- "Benicia"
+  df$'GPS Names'[df$'GPS Names' == "Benicia5"] <- "Benicia"
+  df$'GPS Names'[df$'GPS Names' == "Benicia6"] <- "Benicia"
+  df$'GPS Names'[df$'GPS Names' == "Benicia7"] <- "Benicia"
+  df$'GPS Names'[df$'GPS Names' == "Benicia8"] <- "Benicia"
+  df$'GPS Names'[df$'GPS Names' == "Benicia9"] <- "Benicia"
+  df$'GPS Names'[df$'GPS Names' == "Benicia10"] <- "Benicia"
+  df$'GPS Names'[df$'GPS Names' == "Benicia11"] <- "Benicia"
+  df$'GPS Names'[df$'GPS Names' == "Benicia12"] <- "Benicia"
+  df$'GPS Names'[df$'GPS Names' == "Benicia13"] <- "Benicia"
+  df$'GPS Names'[df$'GPS Names' == "Benicia14"] <- "Benicia"
+  df$'GPS Names'[df$'GPS Names' == "Benicia15"] <- "Benicia"
+  df$'GPS Names'[df$'GPS Names' == "Benicia16"] <- "Benicia"
+  
+  #df$'GPS Names'[df$'GPS Names' == "AntiochBr09 "] <- "Antioch"
+  #df$'GPS Names'[df$'GPS Names' == "AntiochBr11 "] <- "Antioch"
+  #df$'GPS Names'[df$'GPS Names' == "AntiochBr13 "] <- "Antioch"
+  #df$'GPS Names'[df$'GPS Names' == "AntiochBr15 "] <- "Antioch"
+  #df$'GPS Names'[df$'GPS Names' == "AntiochBr17 "] <- "Antioch"
+  #df$'GPS Names'[df$'GPS Names' == "AntiochBr18 "] <- "Antioch"
+  #df$'GPS Names'[df$'GPS Names' == "AntiochBr19 "] <- "Antioch"
+  #df$'GPS Names'[df$'GPS Names' == "AntiochBr20 "] <- "Antioch"
+  #df$'GPS Names'[df$'GPS Names' == "AntiochN "] <- "Antioch"
+  
+  
+  #df$'GPS Names'[df$'GPS Names' == "DeckrIs4"] <- "Decker"
+  #df$'GPS Names'[df$'GPS Names' == "DeckrIs1"] <- "Decker"
+  
+  df$'GPS Names'[df$'GPS Names' == "SJ_Blw_Release_1_J"] <- "Blw Rel"
+  df$'GPS Names'[df$'GPS Names' == "SJ_Blw_Release_2_J"] <- "Blw Rel"
+  
+  df$'GPS Names'[df$'GPS Names' == "SJ_Blw_Newman_1_J"] <- "Blw NM"
+  df$'GPS Names'[df$'GPS Names' == "SJ_Blw_Newman_2_J"] <- "Blw NM"
+  
+  df$'GPS Names'[df$'GPS Names' == "Upstream_Release"] <- "Upper Rel"
+  df$'GPS Names'[df$'GPS Names' == "Downstream_Release"] <- "Durham Rel"
+  
+
+  df$'GPS Names'[df$'GPS Names' == "SJ_Mud_SL_Conf_J"] <- "MSC"
+  
+  df$'GPS Names'[df$'GPS Names' == "GEO_1"] <- "GeorgianaSl"
+  df$'GPS Names'[df$'GPS Names' == "GEO_2"] <- "GeorgianaSl"
+  df$'GPS Names'[df$'GPS Names' == "GEO_3"] <- "GeorgianaSl"
+  df$'GPS Names'[df$'GPS Names' == "GEO_4"] <- "GeorgianaSl"
+  
+  df$'GPS Names'[df$'GPS Names' == "GL_D1"] <- "Grant Line"
+  df$'GPS Names'[df$'GPS Names' == "GL_D2"] <- "Grant Line"
+  df$'GPS Names'[df$'GPS Names' == "GL_D3"] <- "Grant Line"
+  df$'GPS Names'[df$'GPS Names' == "GL_D4"] <- "Grant Line"
+  
+  df$'GPS Names'[df$'GPS Names' == "I80-50_Br1"] <- "I80-50 Br"
+  df$'GPS Names'[df$'GPS Names' == "I80-50_Br2"] <- "I80-50 Br"
+  df$'GPS Names'[df$'GPS Names' == "I80-50_Br3"] <- "I80-50 Br"
+  df$'GPS Names'[df$'GPS Names' == "I80-50_Br4"] <- "I80-50 Br"
+  
+  df$'GPS Names'[df$'GPS Names' == "SBG_1"] <- "Blw Georgiana"
+  df$'GPS Names'[df$'GPS Names' == "SBG_2"] <- "Blw Georgiana"
+  df$'GPS Names'[df$'GPS Names' == "SBG_3"] <- "Blw Georgiana"
+  df$'GPS Names'[df$'GPS Names' == "SBG_4"] <- "Blw Georgiana"
+  
+  df$'GPS Names'[df$'GPS Names' == "SRVD_1"] <- "Rio Vista DS"
+  df$'GPS Names'[df$'GPS Names' == "SRVD_2"] <- "Rio Vista DS"
+  df$'GPS Names'[df$'GPS Names' == "SRVD_3"] <- "Rio Vista DS"
+  df$'GPS Names'[df$'GPS Names' == "SRVD_4"] <- "Rio Vista DS"
+  df$'GPS Names'[df$'GPS Names' == "SRVD_5"] <- "Rio Vista DS"
+  
+  df$'GPS Names'[df$'GPS Names' == "SRVU_1"] <- "Rio Vista US"
+  df$'GPS Names'[df$'GPS Names' == "SRVU_2"] <- "Rio Vista US"
+  df$'GPS Names'[df$'GPS Names' == "SRVU_3"] <- "Rio Vista US"
+  df$'GPS Names'[df$'GPS Names' == "SRVU_4"] <- "Rio Vista US"
+  df$'GPS Names'[df$'GPS Names' == "SRVU_5"] <- "Rio Vista US"
+  
+  df$'GPS Names'[df$'GPS Names' == "TowerBr1"] <- "Tower Bridge"
+  df$'GPS Names'[df$'GPS Names' == "TowerBr2"] <- "Tower Bridge"
+  df$'GPS Names'[df$'GPS Names' == "TowerBr3"] <- "Tower Bridge"
+  
+  df$'GPS Names'[df$'GPS Names' == "MID_2"] <- "MidR RR Bridge"
+  df$'GPS Names'[df$'GPS Names' == "OLD_2"] <- "OldR RR Bridge"
+  
+  #df$'GPS Names'[df$'GPS Names' == "HOR_AM1"]<- " HOR Junc"
+  #df$'GPS Names'[df$'GPS Names' == "HOR_AM2"]<- " HOR Junc"
+  #df$'GPS Names'[df$'GPS Names' == "HOR_AM3"]<- " HOR Junc"
+  #df$'GPS Names'[df$'GPS Names' == "HOR_AM4"]<- " HOR Junc"
+  #df$'GPS Names'[df$'GPS Names' == "HOR_AM5"]<- " HOR Junc"
+  #df$'GPS Names'[df$'GPS Names' == "HOR_AM6"]<- " HOR Junc"
+  #df$'GPS Names'[df$'GPS Names' == "HOR_AM7"]<- " HOR Junc"
+  #df$'GPS Names'[df$'GPS Names' == "HOR_AM8"]<- " HOR Junc"
+  #df$'GPS Names'[df$'GPS Names' == "HOR_AM9"]<- " HOR Junc"
+  #df$'GPS Names'[df$'GPS Names' == "HOR_SM1"]<- " HOR Junc"
+  #df$'GPS Names'[df$'GPS Names' == "HOR_SM2"]<- " HOR Junc"
+  #df$'GPS Names'[df$'GPS Names' == "HOR_SM3"]<- " HOR Junc"
+  #df$'GPS Names'[df$'GPS Names' == "HOR_SM4"]<- " HOR Junc"
+  #df$'GPS Names'[df$'GPS Names' == "HOR_SM7"]<- " HOR Junc"
+  #df$'GPS Names'[df$'GPS Names' == "HOR_SM8"]<- " HOR Junc"
+  
+  #FT receivers
+  df$'GPS Names'[df$'GPS Names' == "FT Release"] <- "Franks Tract Rel"
+  
+  df$'GPS Names'[df$'GPS Names' == "FR1"] <- "False River"
+  df$'GPS Names'[df$'GPS Names' == "FR2"] <- "False River"
+  df$'GPS Names'[df$'GPS Names' == "FR3"] <- "False River"
+  df$'GPS Names'[df$'GPS Names' == "FR4"] <- "False River"
+  
+  df$'GPS Names'[df$'GPS Names' == "FC1"] <- "Fisherman Cut"
+  df$'GPS Names'[df$'GPS Names' == "FC2"] <- "Fisherman Cut"
+  
+  df$'GPS Names'[df$'GPS Names' == "Taylor_Sl"] <- "Taylor Slough"
+  
+  df$'GPS Names'[df$'GPS Names' == "FTOR1"] <- "FT East Inlet"
+  df$'GPS Names'[df$'GPS Names' == "FTOR2"] <- "FT East Inlet"
+  df$'GPS Names'[df$'GPS Names' == "FTOR3"] <- "FT East Inlet"
+  df$'GPS Names'[df$'GPS Names' == "FTOR4"] <- "FT East Inlet"
+  df$'GPS Names'[df$'GPS Names' == "FTOR5"] <- "FT East Inlet"
+  df$'GPS Names'[df$'GPS Names' == "FTOR6"] <- "FT East Inlet"
+  
+  df$'GPS Names'[df$'GPS Names' == "OR Q1"] <- "OldR Quimby"
+  df$'GPS Names'[df$'GPS Names' == "OR Q2"] <- "OldR Quimby"
+  
+  df$'GPS Names'[df$'GPS Names' == "HC3"] <- "Holland Cut"
+  df$'GPS Names'[df$'GPS Names' == "HC4"] <- "Holland Cut"
+  df$'GPS Names'[df$'GPS Names' == "HC1"] <- "Holland Cut"
+  df$'GPS Names'[df$'GPS Names' == "HC2"] <- "Holland Cut"
+  
+  df$'GPS Names'[df$'GPS Names' == "SM1"] <- "Sandmound Sl"
+  df$'GPS Names'[df$'GPS Names' == "SM2"] <- "Sandmound Sl"
+  return(df)
+}
+
+#EXAMPLE:
+#dets_up_grouped <- change_receiver_names(dets_up_transit)
+#dets_ds_grouped <-  change_receiver_names(dets_ds_transit)
+```
+
+5. Run function below to calculate the transit rates. Determine transit rate by calculating the rate of each detection line, but then selecting only the detections we want (last detection at the first receiver and first detection at the second, then last detection at the second and first detection at the third, etc...) via an if statement.
+Your two df_detections files will be CSVs from each release group (described at top)
+The df from this function will be your df_transit in the order route function 
+
+```{r}
+get_transit_rate<- function(df_detections, rkm_low , rkm_high) { 
+  df_transit <- NULL
+  rkm_det <- subset(df_detections, rkm > rkm_low & rkm < rkm_high)
+  all_tags <- unique(rkm_det$Hex)
+  #print(all_tags)
+  for (tag1 in all_tags) {
+    #print(tag1)
+    ind_tag <- subset(rkm_det, rkm_det$Hex == tag1)
+    ind_tag <- ind_tag[order(ind_tag$dtf), ]
+    all_tag_rows <- c(1:nrow(ind_tag))
+    for (hex in all_tag_rows) {
+      first_receiver <- ind_tag$`GPS Names`[hex] 
+      first_rkm <- ind_tag$rkm[hex] 
+      first_dtf <- ind_tag$dtf[hex]
+      second_receiver <- ind_tag$`GPS Names`[hex +1]
+      second_rkm <- ind_tag$rkm[hex +1]
+      second_dtf <- ind_tag$dtf[hex +1]
+      diff_rkm <- first_rkm - second_rkm
+      diff_time <- as.numeric(difftime(as.character(second_dtf), as.character(first_dtf), units = "days"))
+      if(hex == nrow(ind_tag)) {
+        break
+      }
+      if(first_rkm != second_rkm & diff_rkm !=0 ){ #& diff_rkm > 1){
+        transit_rate <- diff_rkm/diff_time
+        df_transit <- rbind(df_transit, data.frame(tag1, first_receiver, second_receiver, first_rkm, second_rkm, first_dtf, second_dtf, transit_rate))
+      }
+    }
+  }
+  return(df_transit)
+  df_transit_test <<- df_transit
+}
+# EXAMPLE:
+#df_transit_up<- get_transit_rate(dets_up_grouped, 0, 500)
+#df_transit_ds<- get_transit_rate(dets_ds_grouped, 0, 500)
+```
+
+6. Run order_route function to make the plots. This function will order your transit rate dataframe by route and locations within that route. Just input which route vector you want, the newly made transit rate df, the locations df you want, and pdf name
+NOTE: if you gett his error: 
+Error in `$<-.data.frame`(`*tmp*`, "transit_rate_final", value = c(46.2411511009295,  : 
+  replacement has 5 rows, data has 3
+  this means you have to change the row in which R is putting the n total above. 
+  ex.: so you would have to change this 5 to a 3
+  medians$transit_rate_final[5] <- 104
+*** For some reason this function is not adjusing the n for the last plot in upper release and delta release groups- need to figure out why 
+```{r}
+order_route<- function(route_vector, transit_rate_df, locations_df, pdf_name) { 
+  pdf(paste("figure_output/TransitRate/", pdf_name, ".pdf", sep = ""))
+  df_route <- NULL
+  for (route in route_vector) {
+    df_all_rates <- NULL
+    loc_colname <- route
+    print(loc_colname)
+    number <- 1
+    all_rows <- c(1:nrow(locations_df))
+    #print("here")
+    for (row in all_rows) {
+      first <- locations_df[[loc_colname]][row]
+      second <- locations_df[[loc_colname]][row + 1]
+      print(first)
+      print(second)
+      print("here")
+      df_route <- rbind(df_route, data.frame(first, second))
+      if (is.na(first) == TRUE) {
+        next
+      }
+      #print("here")
+      #incorporate transit rate:
+      one_move <- subset(transit_rate_df, grepl(first, transit_rate_df$first_receiver) & grepl(second, transit_rate_df$second_receiver))
+      one_move_rows <- c(1:nrow(one_move))
+      print(one_move_rows)
+      if (nrow(one_move) > 0) {
+        for (add_transit in one_move_rows) {
+          number<- number
+          name_to_name <- paste(first, "to", second)
+          print(name_to_name)
+          transit_rate_final <- one_move$transit_rate[add_transit]
+          print("look here")
+          df_all_rates <- rbind(df_all_rates, data.frame(first, second, name_to_name, transit_rate_final, number))
+          df_new_rate <<- df_all_rates
+        }
+        number <- number +1
+      }
+    }
+    print(df_all_rates)
+    all_names <- unique(df_all_rates$name_to_name)
+    df_total_number <- NULL
+    for (name in all_names) {
+      ind_number <- subset(df_all_rates, df_all_rates$name_to_name == name)
+      total <- nrow(ind_number)
+      df_total_number <- rbind(df_total_number, data.frame(name, total))
+      print("this is the n:")
+      print(df_total_number)
+    }
+    print("wtf")
+    medians <- aggregate(transit_rate_final ~ name_to_name, data = df_all_rates, FUN = median)
+    print("now here")
+    last_medians <<- medians
+    print("and here")
+    #these if statements are specific to these sites, they place the "n" total right above the median line, just change the names and "n" values during different study years
+    if (loc_colname ==  "Upstream Release Mainstem Route To Ocean ") {
+      medians$transit_rate_final[4] <- 55
+      medians$transit_rate_final[9] <- 64
+      medians$transit_rate_final[12] <- 86
+      medians$transit_rate_final[13] <- 35
+      medians$transit_rate_final[] <- 25
+      # FOR SOME REASON THIS GROUP ISNT REGISTEIRNG ANY CHANGE IN ITS GRAPH
+    }
+    if (loc_colname == "Delta Release Old River Route To Pumps") {
+      medians$transit_rate_final[4] <- 8
+    }
+    if (loc_colname ==  "Delta Release Old River Route To Ocean via Pumps") {
+      medians$transit_rate_final[4] <- 7
+      
+    }
+    if (loc_colname ==  "Delta Release Mainstem Route To Ocean ") {
+      medians$transit_rate_final[] <- 50
+      # FOR SOME REASON THIS ONE ALSO ISN'T REGISTERING ANY CHANGE IN ITS GRAPH
+
+    }
+    if (loc_colname ==  "Upstream Release Old River Route To Pumps") {
+      #medians$transit_rate_final[6] <- 57
+      medians$transit_rate_final[9] <- 64
+    }
+    if (loc_colname ==  "Upstream Release Old River Route To Ocean via OR") {
+      medians$transit_rate_final[9] <- 64
+      #medians$transit_rate_final[3] <- 25
+      #medians$transit_rate_final[4] <- 27
+      #medians$transit_rate_final[6] <- 9
+    }
+    if (loc_colname ==  "Upstream Release Old River Route To Ocean via Pumps") {
+      medians$transit_rate_final[9] <- 64
+      #medians$transit_rate_final[3] <- 25
+      #medians$transit_rate_final[4] <- 27
+      #medians$transit_rate_final[6] <- 9
+    }
+    print("dog")
+    if (loc_colname == "#fill in name here#") {
+      transit_plot <- ggplot(data = df_all_rates, mapping = aes(x = name_to_name, y = transit_rate_final)) +
+        geom_boxplot() +
+        scale_x_discrete("Reach Movement") +
+        scale_y_continuous(name = "Transit Rate (km/day)", breaks = seq(0,125,by=25), limits = c(0, 125)) +
+        ggtitle(label = route) +
+        theme(axis.text.x = element_text(angle = 45, hjust = .99, vjust = .99), text = element_text(size=22)) +
+        annotate("text", x = 1:length(unique(df_total_number$name)), y = medians$transit_rate_final - 4 , label = df_total_number$total)
+      plot(transit_plot)
+      
+    } else {
+      
+      transit_plot <- ggplot(data = df_all_rates, mapping = aes(x = name_to_name, y = transit_rate_final)) +
+        geom_boxplot() +
+        scale_x_discrete("Reach Movement") +
+        scale_y_continuous(name = "Transit Rate (km/day)", breaks = seq(0,125,by=25), limits = c(0, 125)) +
+        ggtitle(label = route) +
+        theme(axis.text.x = element_text(angle = 45, hjust = .99, vjust = .99), text = element_text(size=15)) +
+        annotate("text", x = 1:length(unique(df_total_number$name)), y = medians$transit_rate_final + 4 , label = df_total_number$total)
+      plot(transit_plot)
+    }
+  }
+  dev.off()
+}
+
+#EXAMPLE:
+#up_tranist_plots <- order_route(upper_rel_routes, df_transit_up, upper_rel_locations, pdf_name = "Upper Rel plot PDFs" )
+#ds_transit_plots <- order_route(delta_rel_routes, df_transit_ds, delta_rel_locations, pdf_name = "Delta Rel plot PDFs" )
+
+
+```
+
+
+

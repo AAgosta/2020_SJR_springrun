@@ -1,0 +1,80 @@
+---
+title: "2019WaterFall_Plots"
+author: "Colby Hause, Chris Bolte"
+date: "August 13, 2019"
+output: html_document
+---
+The function below plots rkm over time of each fish from a specified group. All rkm plots will show up on one graph.
+df = your dataframe of fish by group
+df_tag_list = your dataframe again, unless you want to look at specific tags, then upload another list
+Things to remeber:
+Make sure that your dtf column is in a datetime format before running the code
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+plot_all_rkm_time_jsats <- function(df, df_tag_list,tag_colname, str_start_datetime, str_end_datetime, high_rkm, low_rkm, pdf_name, gg_title, file_location, initial_rkm = 0) {
+  pdf(paste(file_location, pdf_name, ".pdf", sep = "" )) 
+  #df_edit <- subset(df, rkm > initial_rkm)   use this line for reguar rkm
+  df_edit <- subset(df, Genrkm > initial_rkm)
+  df_edit <- subset(df_edit, dtf > str_start_datetime & dtf < str_end_datetime)
+  all_tags <- unique(df_tag_list[[tag_colname]])
+  df_edit_time <- df_edit[order(df_edit$dtf), ]
+  first_time <- df_edit_time$dtf[1]
+  last_time <- df_edit_time$dtf[nrow(df_edit_time)]
+  first_det <- df_edit$dtf[1]
+  last_det <- df_edit$dtf[nrow(df_edit)]
+  
+  #fish_move <- ggplot(df_edit, aes(x=dtf, y=rkm, color = Hex)) +  use this line for regular rkm
+  fish_move <- ggplot(df_edit, aes(x=dtf, y=Genrkm, color = tag_colname)) +
+    geom_point(size = .25) + geom_line(size = .25) +
+    ggtitle(paste(gg_title)) +
+    xlab("Time After Release") +
+    #ylab("River Kilometer") +
+    theme(plot.title = element_text(size = 10), legend.position = "none") +
+    scale_x_datetime(date_breaks = "5 days") +
+    scale_y_discrete(name = "River Kilometer", limits = seq(low_rkm, high_rkm, by=10)) +
+    coord_cartesian(ylim = c(low_rkm, high_rkm)) +
+    theme(axis.text.x = element_text(angle = 45, hjust = 1))
+  plot(fish_move)
+  dev.off()
+}
+
+```
+
+Example of how code is executed:
+For the upper release group:
+plot_all_rkm_time_jsats(df =dets_up,df_tag_list =  dets_up,tag_colname = "Hex", str_start_datetime = "2019-01-01 00:00:00",
+str_end_datetime = "2019-09-01 00:0:00", high_rkm = 350, low_rkm = 0, pdf_name ="UpperRel_WFplot_NoPredFilter", 
+gg_title = "Upper Release, no predator Filter", file_location = "figure_output//")
+
+For the delta release group:
+plot_all_rkm_time_jsats(df =dets_ds,df_tag_list =  dets_up,tag_colname = "Hex", str_start_datetime = "2019-01-01 00:00:00",
+str_end_datetime = "2019-09-01 00:0:00", high_rkm = 350, low_rkm = 0, pdf_name = "DeltaRel_WFplot_NoPredFilter", 
+gg_title = "Delta Release, no predator Filter", file_location = "figure_output//")
+
+##################################################################################################################################
+
+The function below is to make individual rkm plots that will save as their own pdf into a specified folder.
+*** IF YOUR HEX COLUMN NAME HAS CHANGED MAKE SURE TO REFELCT THAT IN THE CODE
+```{r}
+print_tags <- function(df, pdf_name) {
+  pdf(paste(pdf_name, ".pdf"))  # this opens the pdf
+  all_tags <- unique(df$Hex)
+  for (tag in all_tags) {
+    single_tag<- df %>% 
+      filter(Hex == tag) 
+    #p<-  ggplot(data = single_tag, aes(x = dtf, y = rkm)) + use this line for regular rkm
+    p<-  ggplot(data = single_tag, aes(x = dtf, y = Genrkm)) +
+      geom_point() +
+      geom_line() +
+      ggtitle(tag)+
+      scale_y_continuous(breaks = c(0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 110, 120, 
+                                    130, 140, 150, 160, 170, 180, 190, 200,210, 220, 230, 240, 250, 260, 270))
+    plot(p)
+  }
+  dev.off()     # this closes the pdf
+}
+
+```
+
