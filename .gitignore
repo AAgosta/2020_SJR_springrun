@@ -1,0 +1,9 @@
+.Rproj.user
+.Rhistory
+.RData
+.Ruserdata
+*.pdf
+/data_output/DetectionFiles/old - bad rkms
+/documents
+/figure_output
+/old
