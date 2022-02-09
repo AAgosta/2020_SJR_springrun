@@ -16,14 +16,15 @@ library(readxl)
 # First: reading in prelimiary dataset. Before predator filter has been ran
 
 
-dets_all <- read_csv("data/qFishByRelGroup_2020_AllReleaseGroups.csv")
+dets_all <- read_csv("data/backup files/qFishByRelGroup_AllRelGroups_updatedRKM_backup.csv")
 #tag IDs are normal format (not in exponential) YAY!
+#dets_all <- read_csv("data/qFishByRelGroup_2020_AllReleaseGroups.csv")
 
-dets_up <- read_csv("data_output/2020Dets_raw_UpperRelease.csv")
+dets_up <- read_csv("data_output/2020Dets_raw_UpperRelease_updatedRKM.csv")
 
-dets_ds <- read_csv("data_output/2020Dets_raw_LowerRelease.csv")
+dets_ds <- read_csv("data_output/2020Dets_raw_LowerRelease_updatedRKM.csv")
 
-dets_ft <- read_csv("data_output/2020Dets_raw_FTRelease.csv")
+dets_ft <- read_csv("data_output/2020Dets_raw_FTRelease_updatedRKM.csv")
 
 # DOUBLE CHECK you have all recievers you want in here:
 length(unique(dets_all$`GPS Names`)) # only 117  
@@ -532,18 +533,19 @@ ALLRel_visits2020_firstlast_nofilter <- all_visits %>%
 nrow(ALLRel_visits2020_firstlast_nofilter)
 
 # Save:
+# These files are before the predator filter was placed on the data and updated the RKMs
 #UPPER RELEASE
-write_csv(UpRel_visits2020_firstlast_nofilter, "data_output/DetectionFiles/UpRel_visits2020_firstlast_All_NOAAdata_02012022_noPredFilter.csv") # before predator filter
+write_csv(UpRel_visits2020_firstlast_nofilter, "data_output/DetectionFiles/UpRel_visits2020_firstlast_All_02022022_noPredFilter_updatedRKM.csv") # before predator filter
 
 
 #LOWER/DELTA RELEASE
-write_csv(DeltaRel_visits2020_firstlast_nofilter, "data_output/DetectionFiles/DeltaRel_visits2020_firstlast_All_NOAAdata__02012022_noPredFilter.csv") # before predator filter
+write_csv(DeltaRel_visits2020_firstlast_nofilter, "data_output/DetectionFiles/DeltaRel_visits2020_firstlast_All_02022022_noPredFilter_updatedRKM.csv") # before predator filter
 
 #FRANKS TRACT RELEASE
-write_csv(FranksRel_visits2020_firstlast_nofilter, "data_output/DetectionFiles/FranksRel_visits2020_firstlast_All_NOAAdata__02012022_noPredFilter.csv") # before predator filter
+write_csv(FranksRel_visits2020_firstlast_nofilter, "data_output/DetectionFiles/FranksRel_visits2020_firstlast_All_02022022_noPredFilter_updatedRKM.csv") # before predator filter
 
-
-write_csv(ALLRel_visits2020_firstlast_nofilter, "data_output/DetectionFiles/ALLRel_visits2020_firstlast_All_NOAAdata__02012022_noPredFilter.csv")
+#ALL RELEASES
+write_csv(ALLRel_visits2020_firstlast_nofilter, "data_output/DetectionFiles/ALLRel_visits2020_firstlast_All_02022022_noPredFilter_updatedRKM.csv")
 
 # filter to keep first dets
 
@@ -563,16 +565,15 @@ ALLRel_visits2020_first <- all_visits %>%
   filter(counter==1)
 nrow(ALLRel_visits2020_first)
 
+# These files are before the predator filter was placed on the data and updated the RKMs
+write_csv(UpRel_visits2020_first, "data_output/DetectionFiles/UpRel_visits2020_firstonly_All_NOAAdata_02022022_NoPredFilter_updatedRKM.csv")
 
-write_csv(UpRel_visits2020_first, "data_output/DetectionFiles/UpRel_visits2020_firstonly_All_NOAAdata_02012022_NoPredFilter.csv") # This is the file that is before the predator filter was placed on the data
+write_csv(DeltaRel_visits2020_first, "data_output/DetectionFiles/DeltaRel_visits2020_firstonly_All_NOAAdata_02022022_NoPredFilter_updatedRKM.csv")
+
+write_csv(FranksRel_visits2020_first, "data_output/DetectionFiles/FranksRel_visits2020_firstonly_All_NOAAdata_02022022_NoPredFilter_updatedRKM.csv") 
 
 
-write_csv(DeltaRel_visits2020_first, "data_output/DetectionFiles/DeltaRel_visits2020_firstonly_All_NOAAdata_02012022_NoPredFilter.csv") # This is the file that is before the predator filter was placed on the data
-
-write_csv(FranksRel_visits2020_first, "data_output/DetectionFiles/FranksRel_visits2020_firstonly_All_NOAAdata_02012022_NoPredFilter.csv") # This is the file that is before the predator filter was placed on the data
-
-
-write_csv(ALLRel_visits2020_first, "data_output/DetectionFiles/ALLRel_visits2020_firstonly_All_NOAAdata_02012022_NoPredFilter.csv") # This is the file that is before the predator filter was placed on the data
+write_csv(ALLRel_visits2020_first, "data_output/DetectionFiles/ALLRel_visits2020_firstonly_All_NOAAdata_02022022_NoPredFilter_updatedRKM.csv") 
 
 
 # ><)))))*>  ------------- ><)))))*>  ------------- ><)))))*>  ------------- ><)))))*>  ------------- ><)))))*>  
